@@ -1,0 +1,82 @@
+from numpy import random
+#Extracts text from file
+with open("Bad At Love Lyrics.txt") as f:
+    words = [word for line in f for word in line.split()]
+print(words)
+#Checks if a word is in a list
+def checkList(list,word):
+    for i in list:
+        if i == word:
+            return True
+        else:
+            return False
+
+def TransitionMatrix(text):
+    first_word = text[0]
+    last_word = text[-1]
+    firstWordList = []
+
+    matrix = {}
+    #Sets firstWordList to all of the first words in the file (all words except the last one)
+    for i in range(len(text)):
+        firstWordList.append(text[i])
+    combinations = []
+    #Sets combinations to the different pairs of consecutive words in the file
+    for x in range(len(text) - 1):
+        count = 1
+        if firstWordList[x]==last_word:
+            combinations.append([last_word, first_word])
+        else:
+            combinations.append([firstWordList[x], firstWordList[x + 1]])
+
+    for firstWord, secondWord in combinations:
+        index = 0
+        # Checks if a firstWord is already in the dictionary
+        if firstWord in matrix.keys():
+            # If the second word is already in the dictionary, find the index where it is
+            # present and add 1 to the number of times it appears
+            if secondWord in matrix[firstWord][0]:
+                place = matrix[firstWord][0].index(secondWord)
+                matrix[firstWord][1][place] += 1
+            # If it is not already in the dictionary, appends the second word and 1
+            else:
+                matrix[firstWord][0].append(secondWord)
+                matrix[firstWord][1].append(1)
+        # If first word is not present in the dictionary, create a new key and value
+        else:
+            matrix[firstWord] = [[secondWord],[1]]
+
+        index += 1
+
+    print(matrix)
+    #Changes the dictionary to show probabilities instead of number of times a second word appears
+    for firstWord in matrix.keys():
+        index = 0
+        total = 0
+        for number in matrix[firstWord][1]:
+            total += number
+        print(total)
+        for number in matrix[firstWord][1]:
+            matrix[firstWord][1][index] = number / total
+            index += 1
+    return matrix
+
+def MarkovChain(matrix):
+    lyrics = ''
+    startWord = "I"
+    i = 0
+    #uses a given first word, second words, and probability of second words to create lyrics using random.choice
+    while i < 49:
+        newWord = random.choice(matrix[startWord][0],None, False, matrix[startWord][1])
+
+        lyrics = lyrics + " " + newWord
+        print(newWord)
+        startWord = newWord
+        i += 1
+
+    print(lyrics)
+
+
+
+
+MarkovChain(TransitionMatrix(words))
